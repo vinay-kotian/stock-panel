@@ -74,3 +74,8 @@ func GetStocks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stocks)
 }
+
+// Add this function to serve static files from the web directory
+func ServeWeb(staticDir string) http.Handler {
+	return http.StripPrefix("/web/", http.FileServer(http.Dir(staticDir)))
+}

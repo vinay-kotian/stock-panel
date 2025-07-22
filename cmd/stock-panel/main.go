@@ -22,6 +22,9 @@ func main() {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	})
+
+	http.Handle("/web/", handlers.ServeWeb("web"))
+
 	log.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

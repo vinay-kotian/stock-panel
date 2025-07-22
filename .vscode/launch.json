@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Stock Panel API",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/stock-panel/main.go",
+      "env": {},
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

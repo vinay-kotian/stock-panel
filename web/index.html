@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Option Input</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Stock Option Entry</h1>
+    <form id="optionForm">
+      <label>Symbol <input type="text" name="symbol" required></label>
+      <label>Underlying Symbol <input type="text" name="underlying_symbol" required></label>
+      <label>Option Type
+        <select name="option_type" required>
+          <option value="CALL">CALL</option>
+          <option value="PUT">PUT</option>
+        </select>
+      </label>
+      <label>Strike Price <input type="number" name="strike_price" step="0.01" required></label>
+      <label>Expiry <input type="date" name="expiry" required></label>
+      <label>Price <input type="number" name="price" step="0.01" required></label>
+      <label>Side
+        <select name="side" required>
+          <option value="BUY">BUY</option>
+          <option value="SELL">SELL</option>
+        </select>
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+    <div id="result"></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
