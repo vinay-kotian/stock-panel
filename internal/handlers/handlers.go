@@ -79,3 +79,8 @@ func GetStocks(w http.ResponseWriter, r *http.Request) {
 func ServeWeb(staticDir string) http.Handler {
 	return http.StripPrefix("/web/", http.FileServer(http.Dir(staticDir)))
 }
+
+// Redirect /web/ to /web/pages/index.html for convenience
+func WebRootRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/web/pages/index.html", http.StatusFound)
+}

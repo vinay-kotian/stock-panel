@@ -1,0 +1,105 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 2em 2em 1em 2em;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+h1 {
+  text-align: center;
+  margin-bottom: 1em;
+}
+form label {
+  display: block;
+  margin-bottom: 0.7em;
+}
+input, select {
+  width: 100%;
+  padding: 0.5em;
+  margin-top: 0.2em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+button {
+  width: 100%;
+  padding: 0.7em;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 1em;
+}
+button:hover {
+  background: #1565c0;
+}
+#result, #listResult {
+  margin-top: 1em;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Table styles for the stocks list */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5em;
+  background: #fafbfc;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+thead {
+  background: #1976d2;
+  color: #fff;
+}
+th, td {
+  padding: 0.7em 0.5em;
+  text-align: left;
+}
+tbody tr:nth-child(even) {
+  background: #f0f4f8;
+}
+tbody tr:nth-child(odd) {
+  background: #fff;
+}
+tbody tr:hover {
+  background: #e3f2fd;
+}
+@media (max-width: 700px) {
+  .container {
+    max-width: 98vw;
+    padding: 1em 0.5em 0.5em 0.5em;
+  }
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  thead tr {
+    display: none;
+  }
+  td {
+    position: relative;
+    padding-left: 50%;
+    min-height: 2em;
+    border-bottom: 1px solid #eee;
+  }
+  td:before {
+    position: absolute;
+    left: 0.5em;
+    top: 0.5em;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #1976d2;
+    content: attr(data-label);
+  }
+}
