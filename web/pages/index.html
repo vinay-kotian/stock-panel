@@ -3,34 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock Option Input</title>
+  <title>Add Stock - Stock Panel</title>
   <link rel="stylesheet" href="/web/css/styles.css">
+  <style>
+    /* Ensure immediate visibility of sidebar on desktop */
+    @media (min-width: 769px) {
+      .sidebar {
+        transform: translateX(0) !important;
+      }
+      .main-content {
+        margin-left: 280px !important;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Stock Option Entry</h1>
-    <form id="optionForm">
-      <label>Symbol <input type="text" name="symbol" required></label>
-      <label>Underlying Symbol <input type="text" name="underlying_symbol" required></label>
-      <label>Option Type
-        <select name="option_type" required>
-          <option value="CALL">CALL</option>
-          <option value="PUT">PUT</option>
-        </select>
-      </label>
-      <label>Strike Price <input type="number" name="strike_price" step="0.01" required></label>
-      <label>Expiry <input type="date" name="expiry" required></label>
-      <label>Price <input type="number" name="price" step="0.01" required></label>
-      <label>Side
-        <select name="side" required>
-          <option value="BUY">BUY</option>
-          <option value="SELL">SELL</option>
-        </select>
-      </label>
-      <button type="submit">Submit</button>
-    </form>
-    <div id="result"></div>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>📈 Stock Panel</h2>
+      <p>Trading Management System</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="/web/" class="nav-item">
+        <span class="nav-item-icon">📝</span>
+        <span class="nav-item-text">Add Stock</span>
+        <span class="nav-item-description">Enter new stock options</span>
+      </a>
+      
+      <a href="/web/list/" class="nav-item">
+        <span class="nav-item-icon">📊</span>
+        <span class="nav-item-text">View Trades</span>
+        <span class="nav-item-description">Browse and analyze trades</span>
+      </a>
+      
+      <a href="/web/dashboard/" class="nav-item">
+        <span class="nav-item-icon">📈</span>
+        <span class="nav-item-text">Dashboard</span>
+        <span class="nav-item-description">Performance overview</span>
+      </a>
+      
+      <a href="/login" class="nav-item">
+        <span class="nav-item-icon">🔐</span>
+        <span class="nav-item-text">Login</span>
+        <span class="nav-item-description">Access your account</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <p>Stock Panel v1.0</p>
+      <p>© 2024 Trading System</p>
+    </div>
   </div>
+  
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Hamburger Menu Button -->
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div class="container">
+      <h1>📝 Add Stock</h1>
+      <form id="optionForm">
+        <label>📈 Symbol <input type="text" name="symbol" required></label>
+        <label>🏢 Underlying Symbol <input type="text" name="underlying_symbol" required></label>
+        <label>📋 Option Type
+          <select name="option_type" required>
+            <option value="CALL">CALL</option>
+            <option value="PUT">PUT</option>
+          </select>
+        </label>
+        <label>💰 Strike Price <input type="number" name="strike_price" step="0.01" required></label>
+        <label>📅 Expiry <input type="date" name="expiry" required></label>
+        <label>💵 Price <input type="number" name="price" step="0.01" required></label>
+        <label>🔄 Side
+          <select name="side" required>
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+        </label>
+        <button type="submit">✅ Add Stock</button>
+      </form>
+      <div id="result"></div>
+    </div>
+  </div>
+  
+  <script src="/web/js/navigation.js"></script>
   <script src="/web/js/app.js"></script>
 </body>
 </html>

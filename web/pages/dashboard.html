@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Stock Panel</title>
+  <link rel="stylesheet" href="/web/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Ensure immediate visibility of sidebar on desktop */
+    @media (min-width: 769px) {
+      .sidebar {
+        transform: translateX(0) !important;
+      }
+      .main-content {
+        margin-left: 280px !important;
+      }
+    }
+    
+    /* Dashboard specific styles */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5em;
+      margin-bottom: 2em;
+    }
+    
+    .dashboard-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 4px solid #3498db;
+    }
+    
+    .dashboard-card h3 {
+      margin: 0 0 1em 0;
+      color: #2c3e50;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    
+    .metric-value {
+      font-size: 2em;
+      font-weight: bold;
+      margin: 0.5em 0;
+    }
+    
+    .metric-label {
+      color: #7f8c8d;
+      font-size: 0.9em;
+      margin-bottom: 0.5em;
+    }
+    
+    .chart-container {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 1.5em;
+    }
+    
+    .chart-container h3 {
+      margin: 0 0 1em 0;
+      color: #2c3e50;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    
+    /* Chart specific sizing */
+    .chart-container canvas {
+      max-height: 300px !important;
+      height: 300px !important;
+    }
+    
+    /* Responsive chart sizing */
+    @media (max-width: 768px) {
+      .chart-container canvas {
+        max-height: 250px !important;
+        height: 250px !important;
+      }
+    }
+    
+    .performance-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+      margin-top: 1em;
+    }
+    
+    .performance-item {
+      text-align: center;
+      padding: 1em;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .performance-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 0.3em;
+    }
+    
+    .performance-label {
+      font-size: 0.8em;
+      color: #6c757d;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2em;
+      color: #6c757d;
+    }
+    
+    .error {
+      text-align: center;
+      padding: 2em;
+      color: #dc3545;
+      background: #f8d7da;
+      border-radius: 8px;
+      margin: 1em 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>📈 Stock Panel</h2>
+      <p>Trading Management System</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="/web/" class="nav-item">
+        <span class="nav-item-icon">📝</span>
+        <span class="nav-item-text">Add Stock</span>
+        <span class="nav-item-description">Enter new stock options</span>
+      </a>
+      
+      <a href="/web/list/" class="nav-item">
+        <span class="nav-item-icon">📊</span>
+        <span class="nav-item-text">View Trades</span>
+        <span class="nav-item-description">Browse and analyze trades</span>
+      </a>
+      
+      <a href="/web/dashboard/" class="nav-item">
+        <span class="nav-item-icon">📈</span>
+        <span class="nav-item-text">Dashboard</span>
+        <span class="nav-item-description">Performance overview</span>
+      </a>
+      
+      <a href="/login" class="nav-item">
+        <span class="nav-item-icon">🔐</span>
+        <span class="nav-item-text">Login</span>
+        <span class="nav-item-description">Access your account</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <p>Stock Panel v1.0</p>
+      <p>© 2024 Trading System</p>
+    </div>
+  </div>
+  
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Hamburger Menu Button -->
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div class="container">
+      <h1>📈 Trading Dashboard</h1>
+      
+      <!-- Date Filter -->
+      <div class="chart-container">
+        <h3>📅 Date Filter</h3>
+        <div style="display: flex; gap: 1em; align-items: center; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <label for="startDate" style="display: block; margin-bottom: 0.5em; color: #495057; font-weight: 500;">
+              📅 Start Date:
+            </label>
+            <input type="date" id="startDate" style="width: 100%; padding: 0.8em; border: 1px solid #ced4da; border-radius: 6px; font-size: 1em;">
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <label for="endDate" style="display: block; margin-bottom: 0.5em; color: #495057; font-weight: 500;">
+              📅 End Date:
+            </label>
+            <input type="date" id="endDate" style="width: 100%; padding: 0.8em; border: 1px solid #ced4da; border-radius: 6px; font-size: 1em;">
+          </div>
+          <div style="display: flex; gap: 0.5em; align-items: end;">
+            <button id="applyFilter" style="padding: 0.8em 1.5em; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+              🔍 Apply Filter
+            </button>
+            <button id="resetFilter" style="padding: 0.8em 1.5em; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+              🔄 Reset
+            </button>
+          </div>
+        </div>
+        <div id="filterStatus" style="margin-top: 1em; padding: 0.5em; border-radius: 4px; display: none;"></div>
+      </div>
+      
+      <!-- Key Metrics -->
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <h3>💰 Total P&L</h3>
+          <div class="metric-value" id="totalPnl">₹0.00</div>
+          <div class="metric-label">Overall profit/loss</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <h3>📊 Win Rate</h3>
+          <div class="metric-value" id="winRate">0%</div>
+          <div class="metric-label">Profitable days percentage</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <h3>📅 Trading Days</h3>
+          <div class="metric-value" id="tradingDays">0</div>
+          <div class="metric-label">Total days with trades</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <h3>📈 Avg Daily P&L</h3>
+          <div class="metric-value" id="avgDailyPnl">₹0.00</div>
+          <div class="metric-label">Average daily profit/loss</div>
+        </div>
+      </div>
+      
+      <!-- P&L Chart -->
+      <div class="chart-container">
+        <h3>📈 Daily P&L Trend</h3>
+        <canvas id="pnlChart" width="400" height="200"></canvas>
+      </div>
+      
+      <!-- Performance Summary -->
+      <div class="chart-container">
+        <h3>📊 Performance Summary</h3>
+        <div class="performance-summary" id="performanceSummary">
+          <div class="loading">Loading performance data...</div>
+        </div>
+      </div>
+      
+      <!-- Recent Activity -->
+      <div class="chart-container">
+        <h3>🕒 Recent Trading Activity</h3>
+        <div id="recentActivity">
+          <div class="loading">Loading recent activity...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="/web/js/navigation.js"></script>
+  <script src="/web/js/dashboard.js"></script>
+</body>
+</html> 

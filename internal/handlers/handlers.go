@@ -84,3 +84,53 @@ func ServeWeb(staticDir string) http.Handler {
 func WebRootRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/web/pages/index.html", http.StatusFound)
 }
+
+// GetDailyPnL returns consolidated profit and loss for each day
+func GetDailyPnL(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	rows, err := db.DB.Query("SELECT price, side, timestamp FROM stocks")
+	if err != nil {
+		log.Printf("Failed to query stocks: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type dailyPnL struct {
+		Date string  `json:"date"`
+		PnL  float64 `json:"pnl"`
+	}
+
+	pnlMap := make(map[string]float64)
+	for rows.Next() {
+		var price float64
+		var side string
+		var ts string
+		if err := rows.Scan(&price, &side, &ts); err != nil {
+			log.Printf("Failed to scan stock: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		t, err := time.Parse(time.RFC3339Nano, ts)
+		if err != nil {
+			t, _ = time.Parse(time.RFC3339, ts)
+		}
+		date := t.Format("2006-01-02")
+		if side == "SELL" {
+			pnlMap[date] += price
+		} else if side == "BUY" {
+			pnlMap[date] -= price
+		}
+	}
+
+	var result []dailyPnL
+	for date, pnl := range pnlMap {
+		result = append(result, dailyPnL{Date: date, PnL: pnl})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}

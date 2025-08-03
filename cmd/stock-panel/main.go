@@ -38,6 +38,26 @@ func main() {
 		w.Write([]byte("404 page not found"))
 	})
 
+	// Serve /web/dashboard and /web/dashboard/ as the dashboard page
+	http.HandleFunc("/web/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/web/dashboard/", http.StatusFound)
+	})
+
+	http.HandleFunc("/web/dashboard/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/web/dashboard/" || r.URL.Path == "/web/dashboard" {
+			http.ServeFile(w, r, "web/pages/dashboard.html")
+			return
+		}
+		// Serve other static files (js, css, etc.)
+		staticPath := strings.TrimPrefix(r.URL.Path, "/web/")
+		if strings.HasPrefix(staticPath, "js/") || strings.HasPrefix(staticPath, "css/") {
+			http.ServeFile(w, r, "web/"+staticPath)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 page not found"))
+	})
+
 	// Serve /web/ as the main page
 	http.HandleFunc("/web/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/web/" || r.URL.Path == "/web" {
@@ -63,6 +83,11 @@ func main() {
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
+	})
+
+	// New endpoint for daily P&L
+	http.HandleFunc("/pnl", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetDailyPnL(w, r)
 	})
 
 	log.Println("Server started at :8080")

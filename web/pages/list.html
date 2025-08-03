@@ -3,33 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Traded Stocks List</title>
+  <title>View Trades - Stock Panel</title>
   <link rel="stylesheet" href="/web/css/styles.css">
+  <style>
+    /* Ensure immediate visibility of sidebar on desktop */
+    @media (min-width: 769px) {
+      .sidebar {
+        transform: translateX(0) !important;
+      }
+      .main-content {
+        margin-left: 280px !important;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Traded Stocks by Date</h1>
-    <label for="datePicker">Select Date:
-      <input type="date" id="datePicker" />
-    </label>
-    <button id="loadBtn">Load</button>
-    <table id="stocksTable">
-      <thead>
-        <tr>
-          <th>Symbol</th>
-          <th>Underlying</th>
-          <th>Type</th>
-          <th>Strike</th>
-          <th>Expiry</th>
-          <th>Price</th>
-          <th>Side</th>
-          <th>Timestamp</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="listResult"></div>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>📈 Stock Panel</h2>
+      <p>Trading Management System</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="/web/" class="nav-item">
+        <span class="nav-item-icon">📝</span>
+        <span class="nav-item-text">Add Stock</span>
+        <span class="nav-item-description">Enter new stock options</span>
+      </a>
+      
+      <a href="/web/list/" class="nav-item">
+        <span class="nav-item-icon">📊</span>
+        <span class="nav-item-text">View Trades</span>
+        <span class="nav-item-description">Browse and analyze trades</span>
+      </a>
+      
+      <a href="/web/dashboard/" class="nav-item">
+        <span class="nav-item-icon">📈</span>
+        <span class="nav-item-text">Dashboard</span>
+        <span class="nav-item-description">Performance overview</span>
+      </a>
+      
+      <a href="/login" class="nav-item">
+        <span class="nav-item-icon">🔐</span>
+        <span class="nav-item-text">Login</span>
+        <span class="nav-item-description">Access your account</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <p>Stock Panel v1.0</p>
+      <p>© 2024 Trading System</p>
+    </div>
   </div>
+  
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Hamburger Menu Button -->
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div class="container">
+      <h1>📊 View Trades</h1>
+      <div id="dailyPnl"></div>
+      <div style="display: flex; gap: 1em; align-items: center; margin: 1em 0;">
+        <label for="datePicker" style="flex: 1;">
+          📅 Select Date:
+          <input type="date" id="datePicker" />
+        </label>
+        <button id="loadBtn" style="width: auto; margin: 0;">🔍 Load Trades</button>
+      </div>
+      <table id="stocksTable">
+        <thead>
+          <tr>
+            <th>📈 Symbol</th>
+            <th>🏢 Underlying</th>
+            <th>📋 Type</th>
+            <th>💰 Strike</th>
+            <th>📅 Expiry</th>
+            <th>💵 Price</th>
+            <th>🔄 Side</th>
+            <th>⏰ Timestamp</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="listResult"></div>
+      <button id="showPnlBtn">📊 Show P&L Summary</button>
+      <div id="pnlDisplay"></div>
+    </div>
+  </div>
+  
+  <script src="/web/js/navigation.js"></script>
   <script src="/web/js/list.js"></script>
 </body>
 </html> 
