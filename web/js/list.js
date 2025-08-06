@@ -7,7 +7,13 @@ document.getElementById('loadBtn').addEventListener('click', async function() {
   const dailyPnlDiv = document.getElementById('dailyPnl');
   if (dailyPnlDiv) dailyPnlDiv.innerHTML = '';
   try {
-    const res = await fetch('/stocks');
+    const token = localStorage.getItem('authToken');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const res = await fetch('/stocks', { headers });
     if (!res.ok) throw new Error(await res.text());
     const stocks = await res.json();
     // Filter by date (YYYY-MM-DD)
@@ -33,7 +39,7 @@ document.getElementById('loadBtn').addEventListener('click', async function() {
     }
     // Fetch daily P&L and display for selected date
     if (date) {
-      const pnlRes = await fetch('/pnl');
+      const pnlRes = await fetch('/pnl', { headers });
       if (pnlRes.ok) {
         const pnls = await pnlRes.json();
         const pnlForDate = pnls.find(p => p.date === date);
@@ -83,7 +89,13 @@ document.getElementById('showPnlBtn').addEventListener('click', async function()
   const pnlDisplay = document.getElementById('pnlDisplay');
   pnlDisplay.innerHTML = '<div style="text-align: center; padding: 2em;">Loading P&L data...</div>';
   try {
-    const res = await fetch('/pnl');
+    const token = localStorage.getItem('authToken');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const res = await fetch('/pnl', { headers });
     if (!res.ok) throw new Error(await res.text());
     const pnls = await res.json();
     if (pnls.length === 0) {

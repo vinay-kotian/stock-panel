@@ -17,13 +17,19 @@ class Dashboard {
   
   async loadDashboardData() {
     try {
+      const token = localStorage.getItem('authToken');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       // Load P&L data
-      const pnlResponse = await fetch('/pnl');
+      const pnlResponse = await fetch('/pnl', { headers });
       if (!pnlResponse.ok) throw new Error('Failed to load P&L data');
       this.allPnlData = await pnlResponse.json();
       
       // Load recent trades
-      const tradesResponse = await fetch('/stocks');
+      const tradesResponse = await fetch('/stocks', { headers });
       if (!tradesResponse.ok) throw new Error('Failed to load trades data');
       this.allTradesData = await tradesResponse.json();
       

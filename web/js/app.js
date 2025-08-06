@@ -13,9 +13,15 @@ document.getElementById('optionForm').addEventListener('submit', async function(
   const resultDiv = document.getElementById('result');
   resultDiv.textContent = 'Submitting...';
   try {
+    const token = localStorage.getItem('authToken');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const res = await fetch('/stocks', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify(data)
     });
     if (res.ok) {

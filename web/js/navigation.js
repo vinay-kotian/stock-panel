@@ -24,6 +24,9 @@ class Navigation {
     // Set active page based on current URL
     this.setActivePage();
     
+    // Setup logout functionality
+    this.setupLogout();
+    
     // Add event listeners
     if (this.menuToggle) {
       this.menuToggle.addEventListener('click', () => {
@@ -121,6 +124,38 @@ class Navigation {
         item.classList.remove('active');
       }
     });
+  }
+  
+  setupLogout() {
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        try {
+          const token = localStorage.getItem('authToken');
+          if (token) {
+            // Call logout endpoint
+            await fetch('/auth/logout', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+          }
+          
+          // Clear local storage and redirect
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
+        } catch (error) {
+          console.error('Logout error:', error);
+          // Still redirect even if logout fails
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
+        }
+      });
+    }
   }
 }
 
