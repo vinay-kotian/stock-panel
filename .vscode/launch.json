@@ -8,7 +8,6 @@
       "mode": "auto",
       "program": "${workspaceFolder}/cmd/stock-panel/main.go",
       "env": {},
-      "args": [],
       "cwd": "${workspaceFolder}"
     }
   ]

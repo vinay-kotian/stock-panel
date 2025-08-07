@@ -21,6 +21,9 @@ class Navigation {
   init() {
     console.log('Initializing navigation...');
     
+    // Check authentication status
+    this.checkAuthStatus();
+    
     // Set active page based on current URL
     this.setActivePage();
     
@@ -124,6 +127,39 @@ class Navigation {
         item.classList.remove('active');
       }
     });
+  }
+  
+  checkAuthStatus() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      // No token, redirect to login
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
+        return;
+      }
+    } else {
+      // Verify token is still valid
+      fetch('/auth/verify', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }).then(response => {
+        if (!response.ok) {
+          // Token is invalid, clear it and redirect to login
+          localStorage.removeItem('authToken');
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+            window.location.href = '/login';
+          }
+        }
+      }).catch(error => {
+        console.error('Auth verification error:', error);
+        localStorage.removeItem('authToken');
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          window.location.href = '/login';
+        }
+      });
+    }
   }
   
   setupLogout() {
