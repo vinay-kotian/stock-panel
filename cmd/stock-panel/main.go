@@ -30,6 +30,18 @@ func main() {
 		http.ServeFile(w, r, "web/pages/login.html")
 	})
 
+	http.HandleFunc("/test-login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "test_login.html")
+	})
+
+	http.HandleFunc("/debug-login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "debug_login.html")
+	})
+
+	http.HandleFunc("/simple-test", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "simple_test.html")
+	})
+
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/pages/register.html")
 	})

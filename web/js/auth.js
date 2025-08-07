@@ -12,44 +12,61 @@ class Auth {
   setupLoginForm() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
+      console.log('Login form found, setting up event listener');
       loginForm.addEventListener('submit', (e) => {
+        console.log('Form submit event triggered');
         e.preventDefault();
         this.handleLogin();
       });
+    } else {
+      console.error('Login form not found!');
     }
   }
   
   async handleLogin() {
+    console.log('handleLogin method called');
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const loginButton = document.getElementById('loginButton');
     const buttonText = document.getElementById('buttonText');
     const loadingSpinner = document.getElementById('loadingSpinner');
     
+    console.log('Username:', username ? '***' : 'empty');
+    console.log('Password:', password ? '***' : 'empty');
+    
     // Validate input
     if (!username || !password) {
+      console.log('Validation failed: missing username or password');
       this.showError('Please enter both username and password.');
       return;
     }
+    
+    console.log('Validation passed, making API request');
     
     // Show loading state
     this.setLoadingState(true, loginButton, buttonText, loadingSpinner);
     
     try {
+      const requestBody = {
+        username: username,
+        password: password
+      };
+      console.log('Sending request to /auth/login with body:', JSON.stringify(requestBody));
+      
       const response = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
+        body: JSON.stringify(requestBody)
       });
       
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (response.ok) {
+        console.log('Login successful, redirecting...');
         this.showSuccess('Login successful! Redirecting...');
         // Store auth token if provided
         if (data.token) {
@@ -60,6 +77,7 @@ class Auth {
           window.location.href = '/web/dashboard/';
         }, 1000);
       } else {
+        console.log('Login failed:', data.message);
         this.showError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {

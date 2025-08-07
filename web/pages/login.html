@@ -197,5 +197,72 @@
   </div>
   
   <script src="/web/js/auth.js"></script>
+  <script>
+    // Immediate debugging script
+    console.log('Login page loaded');
+    
+    // Check if auth.js loaded properly
+    if (typeof Auth !== 'undefined') {
+      console.log('Auth class loaded successfully');
+    } else {
+      console.error('Auth class not found - auth.js may not have loaded properly');
+    }
+    
+    // Additional form debugging
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded in inline script');
+      
+      const form = document.getElementById('loginForm');
+      if (form) {
+        console.log('Form found in inline script');
+        
+        // Add a backup event listener
+        form.addEventListener('submit', function(e) {
+          console.log('Form submit caught by inline script');
+          e.preventDefault();
+          
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          
+          console.log('Inline script - Username:', username ? '***' : 'empty');
+          console.log('Inline script - Password:', password ? '***' : 'empty');
+          
+          if (!username || !password) {
+            alert('Please enter both username and password');
+            return;
+          }
+          
+          // Make the request directly
+          fetch('/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: username,
+              password: password
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Inline script response:', data);
+            if (data.token) {
+              localStorage.setItem('authToken', data.token);
+              alert('Login successful! Redirecting...');
+              window.location.href = '/web/dashboard/';
+            } else {
+              alert(data.message || 'Login failed');
+            }
+          })
+          .catch(error => {
+            console.error('Inline script error:', error);
+            alert('Login error: ' + error.message);
+          });
+        });
+      } else {
+        console.error('Form not found in inline script');
+      }
+    });
+  </script>
 </body>
 </html> 

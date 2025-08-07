@@ -90,7 +90,10 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 // HandleLogin processes login requests
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	log.Printf("HandleLogin called with method: %s", r.Method)
+
 	if r.Method != http.MethodPost {
+		log.Printf("Method not allowed: %s", r.Method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -103,6 +106,8 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Request body received: %s", string(body))
+
 	// Parse login request
 	var loginReq LoginRequest
 	if err := json.Unmarshal(body, &loginReq); err != nil {
@@ -111,8 +116,11 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Parsed login request - Username: %s, Password: %s", loginReq.Username, "***")
+
 	// Validate credentials
 	if !isValidCredentials(loginReq.Username, loginReq.Password) {
+		log.Printf("Invalid credentials for user: %s", loginReq.Username)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(LoginResponse{
@@ -120,6 +128,8 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	log.Printf("Credentials validated successfully for user: %s", loginReq.Username)
 
 	// Generate token
 	token, err := generateToken()
@@ -135,10 +145,12 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	// Return success response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(LoginResponse{
+	response := LoginResponse{
 		Token:   token,
 		Message: "Login successful",
-	})
+	}
+	log.Printf("Sending successful login response for user: %s", loginReq.Username)
+	json.NewEncoder(w).Encode(response)
 }
 
 // HandleLogout processes logout requests
