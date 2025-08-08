@@ -174,14 +174,24 @@
         
         <div class="form-group">
           <label for="password">🔒 Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            required 
-            placeholder="Enter your password"
-            autocomplete="current-password"
-          >
+          <div style="position: relative;">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              required 
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            >
+            <button 
+              type="button" 
+              id="togglePassword" 
+              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #666;"
+              title="Show/Hide Password"
+            >
+              👁️
+            </button>
+          </div>
         </div>
         
         <button type="submit" id="loginButton" class="auth-button">
@@ -198,6 +208,23 @@
   
   <script src="/web/js/auth.js"></script>
   <script>
+    // Password toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+          // Toggle the type attribute
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          
+          // Toggle the eye icon
+          togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+      }
+    });
+    
     // Immediate debugging script
     console.log('Login page loaded');
     
