@@ -5,11 +5,20 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/vinaykotian/stock-panel/internal/db"
 	"github.com/vinaykotian/stock-panel/internal/handlers"
 )
 
 func main() {
+	// Load .env file if it exists
+	if err := godotenv.Load(); err != nil {
+		log.Printf("⚠️  No .env file found or error loading it: %v", err)
+		log.Printf("💡 Make sure to set SMTP_USER and SMTP_PASS environment variables for email functionality")
+	} else {
+		log.Printf("✅ .env file loaded successfully")
+	}
+
 	db.InitDB()
 	defer db.DB.Close()
 
@@ -17,51 +26,66 @@ func main() {
 	handlers.StartTokenCleanup()
 
 	// Root redirect to login
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		http.NotFound(w, r)
-	})
-
-	// Authentication routes
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "web/pages/login.html")
-	})
-
-	http.HandleFunc("/test-login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "test_login.html")
-	})
-
-	http.HandleFunc("/debug-login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "debug_login.html")
-	})
-
-	http.HandleFunc("/simple-test", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "simple_test.html")
-	})
-
-	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "web/pages/register.html")
-	})
-
-	http.HandleFunc("/auth/login", handlers.HandleLogin)
-	http.HandleFunc("/auth/register", handlers.HandleRegister)
-	http.HandleFunc("/auth/logout", handlers.HandleLogout)
-	http.HandleFunc("/auth/verify", handlers.HandleVerifyToken)
-
-	// Serve /web and /web/ as the main page, hide /pages in the URL
-	http.HandleFunc("/web", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/web/", http.StatusFound)
-	})
-
-	// Serve /web/list and /web/list/ as the list page (protected)
-	http.HandleFunc("/web/list", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/web/list/", http.StatusFound)
 	}))
 
-	http.HandleFunc("/web/list/", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	// Authentication routes
+	http.HandleFunc("/login", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/pages/login.html")
+	}))
+
+	http.HandleFunc("/test-login", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "test_login.html")
+	}))
+
+	http.HandleFunc("/debug-login", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "debug_login.html")
+	}))
+
+	http.HandleFunc("/simple-test", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "simple_test.html")
+	}))
+
+	http.HandleFunc("/test-email", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "test-email.html")
+	}))
+
+	http.HandleFunc("/register", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/pages/register.html")
+	}))
+
+	http.HandleFunc("/forgot-password", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/pages/forgot-password.html")
+	}))
+
+	http.HandleFunc("/reset-password", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/pages/reset-password.html")
+	}))
+
+	http.HandleFunc("/auth/login", handlers.LoggingMiddleware(handlers.HandleLogin))
+	http.HandleFunc("/auth/register", handlers.LoggingMiddleware(handlers.HandleRegister))
+	http.HandleFunc("/auth/logout", handlers.LoggingMiddleware(handlers.HandleLogout))
+	http.HandleFunc("/auth/verify", handlers.LoggingMiddleware(handlers.HandleVerifyToken))
+	http.HandleFunc("/auth/forgot-password", handlers.LoggingMiddleware(handlers.HandleForgotPassword))
+	http.HandleFunc("/auth/reset-password", handlers.LoggingMiddleware(handlers.HandleResetPassword))
+	http.HandleFunc("/auth/test-email", handlers.LoggingMiddleware(handlers.HandleTestEmail))
+
+	// Serve /web and /web/ as the main page, hide /pages in the URL
+	http.HandleFunc("/web", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/web/", http.StatusFound)
+	}))
+
+	// Serve /web/list and /web/list/ as the list page (protected)
+	http.HandleFunc("/web/list", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/web/list/", http.StatusFound)
+	})))
+
+	http.HandleFunc("/web/list/", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/web/list/" || r.URL.Path == "/web/list" {
 			http.ServeFile(w, r, "web/pages/list.html")
 			return
@@ -74,14 +98,14 @@ func main() {
 		}
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 page not found"))
-	}))
+	})))
 
 	// Serve /web/dashboard and /web/dashboard/ as the dashboard page (protected)
-	http.HandleFunc("/web/dashboard", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/web/dashboard", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/web/dashboard/", http.StatusFound)
-	}))
+	})))
 
-	http.HandleFunc("/web/dashboard/", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/web/dashboard/", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/web/dashboard/" || r.URL.Path == "/web/dashboard" {
 			http.ServeFile(w, r, "web/pages/dashboard.html")
 			return
@@ -94,10 +118,10 @@ func main() {
 		}
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 page not found"))
-	}))
+	})))
 
 	// Serve /web/ as the main page (protected)
-	http.HandleFunc("/web/", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/web/", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/web/" || r.URL.Path == "/web" {
 			http.ServeFile(w, r, "web/pages/index.html")
 			return
@@ -109,10 +133,10 @@ func main() {
 		}
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 page not found"))
-	}))
+	})))
 
 	// API endpoint (protected)
-	http.HandleFunc("/stocks", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/stocks", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			handlers.CollectStock(w, r)
@@ -121,12 +145,12 @@ func main() {
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
-	}))
+	})))
 
 	// New endpoint for daily P&L (protected)
-	http.HandleFunc("/pnl", handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/pnl", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetDailyPnL(w, r)
-	}))
+	})))
 
 	log.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
