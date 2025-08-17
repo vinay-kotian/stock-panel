@@ -525,18 +525,56 @@
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="sidebar">
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <h2><i class="fas fa-chart-line"></i> Stock Panel</h2>
+      <h2>📈 Stock Panel</h2>
+      <p>Trading Management System</p>
     </div>
-    <ul class="sidebar-menu">
-      <li><a href="/web/dashboard/"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-      <li><a href="/web/list/"><i class="fas fa-list"></i> Trades</a></li>
-      <li><a href="/web/alerts/" class="active"><i class="fas fa-bell"></i> Alerts</a></li>
-      <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-    </ul>
-  </nav>
+    
+    <nav class="sidebar-nav">
+      <a href="/web/" class="nav-item">
+        <span class="nav-item-icon">📝</span>
+        <span class="nav-item-text">Add Stock</span>
+        <span class="nav-item-description">Enter new stock options</span>
+      </a>
+      
+      <a href="/web/list/" class="nav-item">
+        <span class="nav-item-icon">📊</span>
+        <span class="nav-item-text">View Trades</span>
+        <span class="nav-item-description">Browse and analyze trades</span>
+      </a>
+      
+      <a href="/web/dashboard/" class="nav-item">
+        <span class="nav-item-icon">📈</span>
+        <span class="nav-item-text">Dashboard</span>
+        <span class="nav-item-description">Performance overview</span>
+      </a>
+      
+      <a href="/web/alerts/" class="nav-item active">
+        <span class="nav-item-icon">🔔</span>
+        <span class="nav-item-text">Alerts</span>
+        <span class="nav-item-description">Manage trading alerts</span>
+      </a>
+      
+      <a href="#" class="nav-item" id="logoutButton">
+        <span class="nav-item-icon">🚪</span>
+        <span class="nav-item-text">Logout</span>
+        <span class="nav-item-description">Sign out of your account</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <p>Stock Panel v1.0</p>
+      <p>© 2024 Trading System</p>
+    </div>
+  </div>
+  
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Hamburger Menu Button -->
+  <button class="menu-toggle" id="menuToggle">☰</button>
 
   <!-- Main Content -->
   <main class="main-content">
