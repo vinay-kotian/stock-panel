@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Alerts - Stock Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #34495e;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Alerts System Test</h1>
+        
+        <div class="test-section">
+            <h3>1. Test Kite API Connection</h3>
+            <p>Test if the Kite 3 API is properly configured and accessible.</p>
+            <button onclick="testKiteAPI()">Test Kite API Connection</button>
+            <div id="kiteResult" class="result" style="display: none;"></div>
+        </div>
+
+                <div class="test-section">
+          <h3>2. Create Test Alert</h3>
+          <p>Create a test alert to verify the alerts system is working.</p>
+          <form id="testAlertForm">
+                            <div class="form-group">
+                  <label for="symbol">Symbol:</label>
+                  <input type="text" id="symbol" value="RELIANCE24JAN2500CE" required>
+                </div>
+            <div class="form-group">
+              <label for="instrumentType">Instrument Type:</label>
+              <select id="instrumentType" required onchange="toggleTestOptionsFields()">
+                <option value="OPTION">Option</option>
+                <option value="STOCK">Stock</option>
+              </select>
+            </div>
+            <div id="testOptionsFields" style="display: block;">
+              <div class="form-group">
+                                  <label for="underlyingSymbol">Underlying Symbol:</label>
+                  <input type="text" id="underlyingSymbol" value="RELIANCE" placeholder="e.g., RELIANCE">
+                </div>
+                <div class="form-group">
+                  <label for="optionType">Option Type:</label>
+                  <select id="optionType">
+                    <option value="CALL">Call</option>
+                    <option value="PUT">Put</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="strikePrice">Strike Price:</label>
+                  <input type="number" id="strikePrice" value="2500" step="0.01" placeholder="e.g., 2500">
+                </div>
+                <div class="form-group">
+                  <label for="expiry">Expiry Date:</label>
+                  <input type="date" id="expiry" value="2024-01-25">
+                </div>
+            </div>
+            <div class="form-group">
+              <label for="alertType">Alert Type:</label>
+              <select id="alertType" required>
+                <option value="PRICE_ABOVE">Price Above</option>
+                <option value="PRICE_BELOW">Price Below</option>
+                <option value="PERCENTAGE_CHANGE">Percentage Change</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="targetValue">Target Value:</label>
+              <input type="number" id="targetValue" value="2500" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="condition">Condition:</label>
+              <select id="condition" required>
+                <option value=">">Greater than (>)</option>
+                <option value="<">Less than (<)</option>
+                <option value=">=">Greater than or equal (>=)</option>
+                <option value="<=">Less than or equal (<=)</option>
+                <option value="==">Equal to (==)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message (optional):</label>
+              <textarea id="message" placeholder="Optional custom message for this alert">Test alert for RELIANCE stock</textarea>
+            </div>
+            <button type="submit">Create Test Alert</button>
+          </form>
+          <div id="createResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. List All Alerts</h3>
+            <p>Retrieve and display all alerts for the current user.</p>
+            <button onclick="listAlerts()">Load Alerts</button>
+            <div id="listResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. System Information</h3>
+            <p>Display current system configuration and status.</p>
+            <button onclick="showSystemInfo()">Show System Info</button>
+            <div id="systemResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Get auth token from localStorage
+        function getAuthToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        // Show result with appropriate styling
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        // Test Kite API connection
+        async function testKiteAPI() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showResult('kiteResult', 'No authentication token found. Please login first.', 'error');
+                    return;
+                }
+
+                const response = await fetch('/alerts/test-kite', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showResult('kiteResult', `✅ ${data.message}`, 'success');
+                } else {
+                    showResult('kiteResult', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('kiteResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Create test alert
+        document.getElementById('testAlertForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showResult('createResult', 'No authentication token found. Please login first.', 'error');
+                    return;
+                }
+
+                const instrumentType = document.getElementById('instrumentType').value;
+                const alertData = {
+                    symbol: document.getElementById('symbol').value,
+                    alert_type: document.getElementById('alertType').value,
+                    target_value: parseFloat(document.getElementById('targetValue').value),
+                    condition: document.getElementById('condition').value,
+                    message: document.getElementById('message').value
+                };
+
+                // Add options data if instrument type is option
+                if (instrumentType === 'OPTION') {
+                    alertData.underlying_symbol = document.getElementById('underlyingSymbol').value;
+                    alertData.option_type = document.getElementById('optionType').value;
+                    alertData.strike_price = parseFloat(document.getElementById('strikePrice').value) || 0;
+                    alertData.expiry = document.getElementById('expiry').value;
+                }
+
+                const response = await fetch('/alerts', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(alertData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showResult('createResult', `✅ ${data.message}\n\nAlert Details:\n${JSON.stringify(data.alert, null, 2)}`, 'success');
+                } else {
+                    showResult('createResult', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('createResult', `❌ Error: ${error.message}`, 'error');
+            }
+        });
+
+        // List all alerts
+        async function listAlerts() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    showResult('listResult', 'No authentication token found. Please login first.', 'error');
+                    return;
+                }
+
+                const response = await fetch('/alerts', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    if (data.alerts && data.alerts.length > 0) {
+                        const alertsText = data.alerts.map(alert => 
+                            `ID: ${alert.id}\nSymbol: ${alert.symbol}\nType: ${alert.alert_type}\nCondition: ${alert.condition} ${alert.target_value}\nStatus: ${alert.is_active ? 'Active' : 'Inactive'}\nCreated: ${new Date(alert.created_at).toLocaleString()}\n---`
+                        ).join('\n');
+                        showResult('listResult', `✅ Found ${data.alerts.length} alert(s):\n\n${alertsText}`, 'success');
+                    } else {
+                        showResult('listResult', 'ℹ️ No alerts found for this user.', 'info');
+                    }
+                } else {
+                    showResult('listResult', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('listResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Show system information
+        function showSystemInfo() {
+            const token = getAuthToken();
+            const info = {
+                'Authentication': token ? '✅ Token found' : '❌ No token',
+                'Current URL': window.location.href,
+                'User Agent': navigator.userAgent,
+                'Timestamp': new Date().toISOString(),
+                'Local Storage': localStorage.getItem('authToken') ? 'Available' : 'Not available'
+            };
+
+            const infoText = Object.entries(info)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('\n');
+
+            showResult('systemResult', `ℹ️ System Information:\n\n${infoText}`, 'info');
+        }
+
+        // Toggle test options fields visibility
+        function toggleTestOptionsFields() {
+            const instrumentType = document.getElementById('instrumentType').value;
+            const optionsFields = document.getElementById('testOptionsFields');
+            
+            if (instrumentType === 'OPTION') {
+                optionsFields.style.display = 'block';
+            } else {
+                optionsFields.style.display = 'none';
+            }
+        }
+
+        // Check authentication on page load
+        window.addEventListener('load', function() {
+            const token = getAuthToken();
+            if (!token) {
+                alert('Please login first to test the alerts system.');
+                window.location.href = '/login';
+            }
+        });
+    </script>
+</body>
+</html>

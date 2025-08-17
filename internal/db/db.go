@@ -47,6 +47,29 @@ func InitDB() {
 		log.Fatalf("Failed to create users table: %v", err)
 	}
 
+	// Create alerts table
+	createAlertsTable := `CREATE TABLE IF NOT EXISTS alerts (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		symbol TEXT NOT NULL,
+		underlying_symbol TEXT,
+		option_type TEXT,
+		strike_price REAL,
+		expiry TEXT,
+		alert_type TEXT NOT NULL,
+		target_value REAL NOT NULL,
+		condition TEXT NOT NULL,
+		message TEXT,
+		is_active BOOLEAN DEFAULT 1,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		user_id INTEGER NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES users (id)
+	);`
+	_, err = DB.Exec(createAlertsTable)
+	if err != nil {
+		log.Fatalf("Failed to create alerts table: %v", err)
+	}
+
 	// Insert default users if they don't exist
 	insertDefaultUsers := `INSERT OR IGNORE INTO users (username, email, password_hash) VALUES 
 		('admin', 'admin@example.com', 'password123'),

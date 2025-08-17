@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerts - Stock Panel</title>
+  <link rel="stylesheet" href="/web/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Ensure immediate visibility of sidebar on desktop */
+    @media (min-width: 769px) {
+      .sidebar {
+        transform: translateX(0) !important;
+      }
+      .main-content {
+        margin-left: 280px !important;
+      }
+    }
+    
+    /* Alerts specific styles */
+    .alerts-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2em;
+    }
+    
+    .alerts-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2em;
+      flex-wrap: wrap;
+      gap: 1em;
+    }
+    
+    .alerts-title {
+      font-size: 2em;
+      color: #2c3e50;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    
+    .add-alert-btn {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 0.75em 1.5em;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .add-alert-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+    
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5em;
+      margin-bottom: 2em;
+    }
+    
+    .alert-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 4px solid #3498db;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .alert-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    
+    .alert-card.inactive {
+      border-left-color: #95a5a6;
+      opacity: 0.7;
+    }
+    
+    .alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1em;
+    }
+    
+    .alert-symbol {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 0;
+    }
+    
+    .alert-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      font-size: 0.9em;
+      padding: 0.25em 0.75em;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    
+    .alert-status.active {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .alert-status.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .alert-details {
+      margin-bottom: 1em;
+    }
+    
+    .alert-detail {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5em;
+      font-size: 0.95em;
+    }
+    
+    .alert-detail-label {
+      color: #7f8c8d;
+      font-weight: 500;
+    }
+    
+    .alert-detail-value {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+    
+    .alert-message {
+      background: #f8f9fa;
+      padding: 0.75em;
+      border-radius: 6px;
+      margin-bottom: 1em;
+      font-style: italic;
+      color: #495057;
+    }
+    
+    .alert-actions {
+      display: flex;
+      gap: 0.5em;
+      justify-content: flex-end;
+    }
+    
+    .alert-btn {
+      padding: 0.5em 1em;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+    }
+    
+    .alert-btn.edit {
+      background: #f39c12;
+      color: white;
+    }
+    
+    .alert-btn.edit:hover {
+      background: #e67e22;
+    }
+    
+    .alert-btn.toggle {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .alert-btn.toggle:hover {
+      background: #229954;
+    }
+    
+    .alert-btn.delete {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .alert-btn.delete:hover {
+      background: #c0392b;
+    }
+    
+    .alert-btn.deactivate {
+      background: #95a5a6;
+      color: white;
+    }
+    
+    .alert-btn.deactivate:hover {
+      background: #7f8c8d;
+    }
+    
+    .no-alerts {
+      text-align: center;
+      padding: 3em;
+      color: #7f8c8d;
+    }
+    
+    .no-alerts i {
+      font-size: 3em;
+      margin-bottom: 1em;
+      color: #bdc3c7;
+    }
+    
+    .no-alerts h3 {
+      margin: 0 0 0.5em 0;
+      color: #2c3e50;
+    }
+    
+    .no-alerts p {
+      margin: 0;
+      font-size: 1.1em;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 2em;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+      padding-bottom: 1em;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .modal-title {
+      font-size: 1.5em;
+      color: #2c3e50;
+      margin: 0;
+    }
+    
+    .close {
+      color: #7f8c8d;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    
+    .close:hover {
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5em;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5em;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+    
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 0.75em;
+      border: 2px solid #ecf0f1;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-input:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+    
+    .form-textarea {
+      width: 100%;
+      padding: 0.75em;
+      border: 2px solid #ecf0f1;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .form-textarea:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1em;
+      justify-content: flex-end;
+      margin-top: 2em;
+    }
+    
+    .btn {
+      padding: 0.75em 1.5em;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary {
+      background: #95a5a6;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+    
+    .btn-primary {
+      background: #3498db;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2980b9;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2em;
+      color: #7f8c8d;
+    }
+    
+    .loading i {
+      font-size: 2em;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Bulk Alert Section Styles */
+    .bulk-alert-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 2em;
+      border-left: 4px solid #27ae60;
+    }
+    
+    .bulk-alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+      flex-wrap: wrap;
+      gap: 1em;
+    }
+    
+    .bulk-alert-header h2 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    
+    .bulk-alert-table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+    }
+    
+    .bulk-alert-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    
+    .bulk-alert-table th {
+      background: #f8f9fa;
+      padding: 0.75em 0.5em;
+      border: 1px solid #dee2e6;
+      text-align: left;
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #495057;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .bulk-alert-table td {
+      padding: 0.5em;
+      border: 1px solid #dee2e6;
+      vertical-align: middle;
+    }
+    
+    .bulk-alert-table input,
+    .bulk-alert-table select {
+      width: 100%;
+      padding: 0.5em;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9em;
+      box-sizing: border-box;
+    }
+    
+    .bulk-alert-table input:focus,
+    .bulk-alert-table select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    
+    .bulk-alert-table .remove-row-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 0.5em;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background-color 0.3s ease;
+    }
+    
+    .bulk-alert-table .remove-row-btn:hover {
+      background: #c0392b;
+    }
+    
+    .bulk-alert-table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    /* Responsive table */
+    @media (max-width: 1200px) {
+      .bulk-alert-table-container {
+        overflow-x: auto;
+      }
+      
+      .bulk-alert-table {
+        min-width: 1000px;
+      }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .alerts-container {
+        padding: 1em;
+      }
+      
+      .alerts-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .alerts-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 1.5em;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-chart-line"></i> Stock Panel</h2>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="/web/dashboard/"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="/web/list/"><i class="fas fa-list"></i> Trades</a></li>
+      <li><a href="/web/alerts/" class="active"><i class="fas fa-bell"></i> Alerts</a></li>
+      <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="alerts-container">
+      <div class="alerts-header">
+        <h1 class="alerts-title">
+          <i class="fas fa-bell"></i>
+          Trading Alerts
+        </h1>
+        <button class="add-alert-btn" onclick="openAddAlertModal()">
+          <i class="fas fa-plus"></i>
+          Add Single Alert
+        </button>
+      </div>
+
+      <!-- Bulk Alert Creation Section -->
+      <div class="bulk-alert-section">
+        <div class="bulk-alert-header">
+          <h2><i class="fas fa-table"></i> Bulk Create Alerts</h2>
+          <div style="display: flex; gap: 1em; align-items: center;">
+            <button type="button" class="btn btn-secondary" onclick="addBulkAlertRow()">
+              <i class="fas fa-plus"></i> Add Row
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="clearBulkAlertRows()">
+              <i class="fas fa-trash"></i> Clear All
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="loadSampleData()">
+              <i class="fas fa-download"></i> Load Sample
+            </button>
+            <button type="button" class="btn btn-primary" onclick="submitBulkAlerts()">
+              <i class="fas fa-save"></i> Create All Alerts
+            </button>
+          </div>
+        </div>
+        
+        <div class="bulk-alert-table-container">
+          <table id="bulkAlertTable" class="bulk-alert-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Underlying</th>
+                <th>Type</th>
+                <th>Strike</th>
+                <th>Expiry</th>
+                <th>Alert Type</th>
+                <th>Target</th>
+                <th>Condition</th>
+                <th>Message</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="bulkAlertTableBody">
+              <!-- Rows will be added here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="alertsGrid" class="alerts-grid">
+        <!-- Alerts will be loaded here -->
+      </div>
+
+      <div id="loading" class="loading">
+        <i class="fas fa-spinner"></i>
+        <p>Loading alerts...</p>
+      </div>
+
+      <div id="noAlerts" class="no-alerts" style="display: none;">
+        <i class="fas fa-bell-slash"></i>
+        <h3>No Alerts Yet</h3>
+        <p>Create your first trading alert to get started</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add/Edit Alert Modal -->
+  <div id="alertModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle" class="modal-title">Add New Alert</h2>
+        <span class="close" onclick="closeAlertModal()">&times;</span>
+      </div>
+      
+      <form id="alertForm">
+        <div class="form-group">
+          <label for="symbol" class="form-label">Symbol *</label>
+          <input type="text" id="symbol" class="form-input" placeholder="e.g., RELIANCE, TCS, RELIANCE24JAN2500CE" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="instrumentType" class="form-label">Instrument Type *</label>
+          <select id="instrumentType" class="form-select" required onchange="toggleOptionsFields()">
+            <option value="OPTION">Option</option>
+            <option value="STOCK">Stock</option>
+          </select>
+        </div>
+        
+        <div id="optionsFields" style="display: block;">
+          <div class="form-group">
+            <label for="underlyingSymbol" class="form-label">Underlying Symbol</label>
+            <input type="text" id="underlyingSymbol" class="form-input" placeholder="e.g., RELIANCE">
+          </div>
+          
+          <div class="form-group">
+            <label for="optionType" class="form-label">Option Type</label>
+            <select id="optionType" class="form-select">
+              <option value="">Select option type</option>
+              <option value="CALL">Call</option>
+              <option value="PUT">Put</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="strikePrice" class="form-label">Strike Price</label>
+            <input type="number" id="strikePrice" class="form-input" step="0.01" placeholder="e.g., 2500">
+          </div>
+          
+          <div class="form-group">
+            <label for="expiry" class="form-label">Expiry Date</label>
+            <input type="date" id="expiry" class="form-input">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="alertType" class="form-label">Alert Type *</label>
+          <select id="alertType" class="form-select" required>
+            <option value="">Select alert type</option>
+            <option value="PRICE_ABOVE">Price Above</option>
+            <option value="PRICE_BELOW">Price Below</option>
+            <option value="PERCENTAGE_CHANGE">Percentage Change</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="targetValue" class="form-label">Target Value *</label>
+          <input type="number" id="targetValue" class="form-input" step="0.01" placeholder="Enter target value" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="condition" class="form-label">Condition *</label>
+          <select id="condition" class="form-select" required>
+            <option value="">Select condition</option>
+            <option value=">">Greater than (>)</option>
+            <option value="<">Less than (<)</option>
+            <option value=">=">Greater than or equal (>=)</option>
+            <option value="<=">Less than or equal (<=)</option>
+            <option value="==">Equal to (==)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="message" class="form-label">Alert Message</label>
+          <textarea id="message" class="form-textarea" placeholder="Optional custom message for this alert"></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeAlertModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Create Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Confirm Action</h2>
+        <span class="close" onclick="closeConfirmModal()">&times;</span>
+      </div>
+      
+      <div style="margin-bottom: 2em;">
+        <p id="confirmMessage">Are you sure you want to perform this action?</p>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/web/js/navigation.js"></script>
+  <script src="/web/js/alerts.js"></script>
+</body>
+</html>

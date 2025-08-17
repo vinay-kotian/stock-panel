@@ -55,6 +55,10 @@ func main() {
 		http.ServeFile(w, r, "test-email.html")
 	}))
 
+	http.HandleFunc("/test-alerts", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "test-alerts.html")
+	}))
+
 	http.HandleFunc("/register", handlers.LoggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/pages/register.html")
 	}))
@@ -150,6 +154,52 @@ func main() {
 	// New endpoint for daily P&L (protected)
 	http.HandleFunc("/pnl", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetDailyPnL(w, r)
+	})))
+
+	// Alerts endpoints (protected)
+	http.HandleFunc("/alerts", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			handlers.CreateAlert(w, r)
+		case http.MethodGet:
+			handlers.GetAlerts(w, r)
+		case http.MethodPut:
+			handlers.UpdateAlert(w, r)
+		case http.MethodDelete:
+			handlers.DeleteAlert(w, r)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	})))
+
+	// Alert toggle endpoint (protected)
+	http.HandleFunc("/alerts/toggle", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.ToggleAlert(w, r)
+	})))
+
+	// Test Kite API endpoint (protected)
+	http.HandleFunc("/alerts/test-kite", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.TestKiteAPI(w, r)
+	})))
+
+	// Serve /web/alerts and /web/alerts/ as the alerts page (protected)
+	http.HandleFunc("/web/alerts", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/web/alerts/", http.StatusFound)
+	})))
+
+	http.HandleFunc("/web/alerts/", handlers.LoggingMiddleware(handlers.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/web/alerts/" || r.URL.Path == "/web/alerts" {
+			http.ServeFile(w, r, "web/pages/alerts.html")
+			return
+		}
+		// Serve other static files (js, css, etc.)
+		staticPath := strings.TrimPrefix(r.URL.Path, "/web/")
+		if strings.HasPrefix(staticPath, "js/") || strings.HasPrefix(staticPath, "css/") {
+			http.ServeFile(w, r, "web/"+staticPath)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 page not found"))
 	})))
 
 	log.Println("Server started at :8080")

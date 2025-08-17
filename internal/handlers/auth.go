@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -19,6 +20,9 @@ import (
 var (
 	// Simple token storage (in production, use Redis or database)
 	tokens = make(map[string]time.Time)
+
+	// Token to user mapping (in production, use Redis or database)
+	tokenUsers = make(map[string]string)
 
 	// Password reset tokens storage
 	resetTokens = make(map[string]resetTokenData)
@@ -144,7 +148,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// For API requests, check Authorization header
-		if strings.HasPrefix(r.URL.Path, "/stocks") || strings.HasPrefix(r.URL.Path, "/pnl") {
+		if strings.HasPrefix(r.URL.Path, "/stocks") || strings.HasPrefix(r.URL.Path, "/pnl") || strings.HasPrefix(r.URL.Path, "/alerts") {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 				w.WriteHeader(http.StatusUnauthorized)
@@ -158,6 +162,27 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 				w.Write([]byte(`{"error": "Invalid token"}`))
 				return
 			}
+
+			// Get user information from token
+			username, exists := tokenUsers[token]
+			if !exists {
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"error": "Invalid token"}`))
+				return
+			}
+
+			// Get user ID from database
+			userID, err := getUserIDByUsername(username)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"error": "Failed to get user information"}`))
+				return
+			}
+
+			// Add user information to request context
+			ctx := context.WithValue(r.Context(), "userID", userID)
+			ctx = context.WithValue(ctx, "username", username)
+			r = r.WithContext(ctx)
 		}
 
 		// For page requests, allow them to proceed (frontend will handle auth)
@@ -227,8 +252,9 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Store token with expiration
+	// Store token with expiration and user mapping
 	tokens[token] = time.Now().Add(24 * time.Hour) // 24 hour expiration
+	tokenUsers[token] = loginReq.Username
 
 	// Return success response
 	w.Header().Set("Content-Type", "application/json")
@@ -253,6 +279,7 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(authHeader, "Bearer ") {
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 		delete(tokens, token)
+		delete(tokenUsers, token)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -398,6 +425,7 @@ func CleanupExpiredTokens() {
 	for token, expiration := range tokens {
 		if time.Now().After(expiration) {
 			delete(tokens, token)
+			delete(tokenUsers, token) // Also clean up user mapping
 		}
 	}
 	// Also clean up expired reset tokens
@@ -696,4 +724,14 @@ func HandleTestEmail(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"message": "Test email sent successfully!",
 	})
+}
+
+// getUserIDByUsername retrieves user ID by username
+func getUserIDByUsername(username string) (int, error) {
+	var userID int
+	err := db.DB.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
 }
