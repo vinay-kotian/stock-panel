@@ -1,0 +1,7 @@
+2025/08/15 21:36:20 📧 Email service configured - Host: smtp.gmail.com, User: vdkotian1@gmail.com
+2025/08/15 21:36:20 ✅ .env file loaded successfully
+2025/08/15 21:36:20 Server started at :8080
+2025/08/15 21:36:26 📧 Connecting to SMTP server...
+2025/08/15 21:36:26 📧 SMTP Details - Host: smtp.gmail.com, Port: 587, User: vdkotian1@gmail.com
+2025/08/15 21:36:26 📧 Attempting to send email - From: vdkotian1@gmail.com, To: vdkotian1@gmail.com, Subject: Test Email - Stock Panel
+2025/08/15 21:36:29 ✅ Email sent successfully to vdkotian1@gmail.com
